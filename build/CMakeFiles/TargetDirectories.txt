@@ -1,3 +1,0 @@
-/cygdrive/c/Users/michi/Projects/Chess_engine/build/CMakeFiles/chess_engine.dir
-/cygdrive/c/Users/michi/Projects/Chess_engine/build/CMakeFiles/edit_cache.dir
-/cygdrive/c/Users/michi/Projects/Chess_engine/build/CMakeFiles/rebuild_cache.dir

@@ -1,1 +1,0 @@
-/usr/bin/c++.exe -g -Wl,--enable-auto-import CMakeFiles/chess_engine.dir/src/encoding.cpp.o CMakeFiles/chess_engine.dir/src/main.cpp.o -o chess_engine.exe -Wl,--out-implib,libchess_engine.dll.a -Wl,--major-image-version,0,--minor-image-version,0

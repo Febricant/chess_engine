@@ -1,0 +1,3 @@
+build/
+*.exe
+.claude/settings.local.json

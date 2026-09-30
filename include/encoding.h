@@ -1,3 +1,4 @@
 #pragma once
+#include <cstdint>
 
-int encoding(int a);
+int encoding();

@@ -4,6 +4,10 @@
 
 
 int main() {
-    return 0;
 
+    std::cout << "Hello World!" << "\n";
+    int dpt = encoding();
+    std::cout << "DPT IS: " << dpt << "\n";
+    return 0;
+    
 }
