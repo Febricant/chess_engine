@@ -46,10 +46,23 @@ firmware too. I'm comfortable in Python; ML is new.
   C++") instead of restating documentation as code.
 
 ## Project context
-- Dev setup: Cygwin g++ on Windows, run via VS Code integrated terminal
-  (Cygwin bash), inherited from a programming class.
-- Full plan lives in the repo: `Chess_engine/ROADMAP.md` is the map,
-  `Chess_engine/NOW.md` is the "you are here" pin and is kept current.
+- Full setup/run instructions (new machine, VS Code, troubleshooting): `SETUP.md`.
+- Dev setup: native Linux g++ (`/usr/bin/g++`) in WSL (Ubuntu), VS Code
+  connected via the WSL extension. Build with `cmake --preset default` +
+  `cmake --build --preset default`; binary lands at `build/chess_engine`.
+  In VS Code: `CMake Build` task = configure (`--preset default`),
+  `CMake Compile` task = build (default build task, Ctrl+Shift+B), and F5
+  with the `chess_engine` launch config builds then runs under gdb. Don't
+  use the C/C++ extension's editor ▶ "Run C/C++ File" button — it compiles
+  only the open file with bare gcc, bypassing CMake (no `include/` path, no
+  other .cpp files, no libstdc++), and re-adds a "gcc build active file"
+  task to tasks.json. IntelliSense reads include paths from
+  `build/compile_commands.json` (exported by the preset, wired up in
+  `.vscode/settings.json`), so re-run the configure step if a header
+  squiggle appears after adding files/dirs. Don't configure from Cygwin — its CMake/compiler was
+  the source of an earlier broken build cache.
+- Full plan lives in the repo: `ROADMAP.md` is the map,
+  `NOW.md` is the "you are here" pin and is kept current.
 - Roadmap (milestone order, don't skip ahead):
   1. Board representation (10x12 mailbox, flat 1D array) + FEN + print
   2. Legal move generation (per piece, then full) + perft
