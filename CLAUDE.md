@@ -47,6 +47,14 @@ firmware too. I'm comfortable in Python; ML is new.
 
 ## Project context
 - Full setup/run instructions (new machine, VS Code, troubleshooting): `SETUP.md`.
+- Git/GitHub workflow (details in `SETUP.md` §7): never commit to `main`;
+  branch → commit → `git push -u origin HEAD` → `gh pr create` → merge →
+  `git checkout main && git pull`. Only commit/push/merge when I ask. `gh`
+  (GitHub's own apt source, not Ubuntu's outdated 2.46) is installed and
+  logged in as `Febricant`; it opens links via
+  `/mnt/c/Windows/explorer.exe` because `wslu` isn't packaged for Ubuntu
+  26.04 and `/etc/wsl.conf` has `appendWindowsPath = false`. Repo-local git
+  identity is `Michio <michiob2@gmail.com>`.
 - Dev setup: native Linux g++ (`/usr/bin/g++`) in WSL (Ubuntu), VS Code
   connected via the WSL extension. Build with `cmake --preset default` +
   `cmake --build --preset default`; binary lands at `build/chess_engine`.
