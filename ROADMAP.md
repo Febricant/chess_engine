@@ -27,9 +27,17 @@ The project has three tracks:
 
 ### Current state
 
-CMake build works end-to-end under Cygwin (g++ 14.4, cmake 4.4.3, make 4.4.1,
-gdb 17.2). `src/main.cpp` holds a 17-line scratch loop with a known out-of-bounds write
-(char used as array subscript, line 9), to be discarded as milestone 1 begins.
+*As of 2026-09-30.* Toolchain moved off Cygwin to native Linux in WSL (Ubuntu): g++
+15.2, cmake 4.2.3, make 4.4.1, gdb 17.1, driven by CMake presets and VS Code over the
+WSL extension (details in `SETUP.md`). Git work goes branch → PR → merge via `gh`; PRs
+#1 (build tooling + `SETUP.md`) and #2 (`gh` workflow docs) are merged.
+
+Milestone 1, Step 0 is done (10x12 mailbox, flat 1D array). Step 1 is in progress:
+`include/encoding.h` and `src/encoding.cpp` exist and are picked up by the build, and a
+draft piece encoding is sketched in a comment in `encoding.cpp` (0 off-board, 1 empty,
+2–7 white, 10–15 black, so colour sits in bit 3). Not yet an `enum class`; no square
+mapping tables yet. `main.cpp` is still scratch, and the build has one warning (an
+unused placeholder array in `encoding.cpp`).
 
 ---
 
