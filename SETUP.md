@@ -12,6 +12,7 @@ is a numbered command block, and every config file is explained in the
 > ./build/chess_engine                        # run
 > ```
 > In VS Code: **Ctrl+Shift+B** to build, **F5** to build + run under the debugger.
+> Changes go to GitHub via a branch + pull request — see [§7](#7-github-cli-gh-and-the-pr-workflow).
 
 ---
 
@@ -23,8 +24,9 @@ is a numbered command block, and every config file is explained in the
 4. [Get the code](#4-get-the-code)
 5. [Set up VS Code](#5-set-up-vs-code)
 6. [Build and run](#6-build-and-run)
-7. [Troubleshooting](#7-troubleshooting)
-8. [Reference](#reference)
+7. [GitHub CLI (`gh`) and the PR workflow](#7-github-cli-gh-and-the-pr-workflow)
+8. [Troubleshooting](#8-troubleshooting)
+9. [Reference](#reference)
 
 ---
 
@@ -38,6 +40,7 @@ is a numbered command block, and every config file is explained in the
 | `make` | any | CMake generates Makefiles. |
 | `gdb` | any | Debugger used by F5 in VS Code. |
 | `git` | any | Version control. |
+| `gh` | 2.102 (**not** Ubuntu's 2.46) | GitHub CLI: pull requests from the terminal. Install from GitHub's source (§7). |
 | VS Code | latest | Editor, connected to WSL. |
 
 **Do not** use Cygwin or MinGW compilers/CMake. A Cygwin CMake previously
@@ -90,12 +93,8 @@ git clone https://github.com/Febricant/chess_engine.git
 cd chess_engine
 ```
 
-Set your git identity if this is a new machine:
-
-```bash
-git config --global user.name  "Your Name"
-git config --global user.email "you@example.com"
-```
+New machine? Set your git identity before the first commit (§7.5), and
+install `gh` (§7.1) so you can open pull requests.
 
 > **Note:** The repo lives on the Windows drive (`/mnt/c/...`) so it is visible
 > from Windows too. Keeping it in the Linux home (`~/projects`) builds faster;
@@ -186,7 +185,117 @@ cmake --build build-release
 
 ---
 
-## 7. Troubleshooting
+## 7. GitHub CLI (`gh`) and the PR workflow
+
+`git` moves code between your machine and GitHub. `gh` handles the GitHub
+side — pull requests, issues, Actions runs — from the terminal. It is
+optional for building, but it is how PRs are created here (by you or by an
+AI assistant).
+
+### 7.1 Install `gh` from GitHub's own source
+
+> ⚠️ **Do not** just `sudo apt install gh`. Ubuntu's copy is old (2.46) and
+> `gh pr view` fails with
+> `GraphQL: Projects (classic) is being deprecated ... (repository.pullRequest.projectCards)`.
+> Add GitHub's package source first, so `apt` installs (and later updates)
+> the current release.
+
+```bash
+# 1. Save GitHub's signing key (lets apt verify packages really come from GitHub)
+sudo mkdir -p -m 755 /etc/apt/keyrings
+wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
+sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+
+# 2. Register GitHub's package source, locked to that key
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+  | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+# 3. Install (or upgrade an old Ubuntu copy)
+sudo apt update
+sudo apt install gh -y
+gh --version     # expect 2.10x or newer, NOT 2.46
+```
+
+If a command fails, compare with the official instructions:
+<https://github.com/cli/cli/blob/trunk/docs/install_linux.md>.
+
+### 7.2 One-time login and WSL browser fix
+
+```bash
+gh auth login
+#   GitHub.com → HTTPS → "Authenticate Git with your GitHub credentials?" Yes
+#   → Login with a web browser (copy the one-time code, open the link in Windows)
+gh auth status   # should show: Logged in to github.com account Febricant
+
+# Let gh open links in the Windows browser (for --web flags)
+gh config set browser "/mnt/c/Windows/explorer.exe"
+```
+
+Why the browser line is needed: WSL has no program to open a Windows
+browser. The usual fix, `wslu` (`wslview`), is **not packaged for Ubuntu
+26.04**, and this machine's `/etc/wsl.conf` sets `appendWindowsPath = false`,
+so plain `explorer.exe` isn't on the PATH — hence the full `/mnt/c/...` path.
+
+### 7.3 The everyday workflow
+
+Never commit straight to `main`. Every change goes: **branch → commit →
+push → PR → merge → sync**.
+
+```bash
+# 0. Start from an up-to-date main
+git checkout main
+git pull
+
+# 1. Make a branch named after the change
+git checkout -b board-fen-parsing
+
+# 2. Work, build, test… then commit
+git add -A
+git status                     # check nothing unexpected is staged
+git commit -m "Parse FEN into the 10x12 mailbox"
+
+# 3. Push the branch and open a PR
+git push -u origin HEAD
+gh pr create --fill            # title/body from the commit(s); or omit --fill to be prompted
+
+# 4. Look it over
+gh pr view --web               # opens the PR in the browser
+gh pr diff                     # or read the diff in the terminal
+
+# 5. Merge and clean up
+gh pr merge --merge --delete-branch
+git checkout main && git pull  # make sure local main has the merge
+```
+
+### 7.4 `gh` cheat sheet
+
+| Goal | Command |
+|---|---|
+| Status of my PRs | `gh pr status` |
+| List open PRs | `gh pr list` |
+| Show PR #N (terminal / browser) | `gh pr view N` / `gh pr view N --web` |
+| Show PR #N's diff | `gh pr diff N` |
+| Check out someone's PR locally | `gh pr checkout N` |
+| Merge current branch's PR | `gh pr merge --merge --delete-branch` |
+| Open the repo in the browser | `gh repo view --web` |
+| Issues | `gh issue list`, `gh issue create`, `gh issue view N` |
+| CI runs (once Actions exist) | `gh run list`, `gh run watch` |
+| Who am I logged in as | `gh auth status` |
+
+### 7.5 First-time git identity
+
+Commits fail with `Author identity unknown` until git knows who you are
+(once per machine):
+
+```bash
+git config --global user.name  "Michio"
+git config --global user.email "michiob2@gmail.com"
+```
+
+---
+
+## 8. Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -196,6 +305,10 @@ cmake --build build-release
 | `cmake --build` says `could not load cache` / compiler errors mentioning `.exe` | Stale or Windows-made `build/` | `rm -rf build && cmake --preset default` |
 | `CMake Error: ... preset version 6 ... not supported` | CMake older than 3.25 | Upgrade CMake (§3). |
 | Program waits and prints nothing | It's waiting for `std::cin` input | Type input in the terminal (F5: the debug terminal). |
+| `gh pr view`: `GraphQL: Projects (classic) is being deprecated` | Ubuntu's old `gh` 2.46 | Install from GitHub's source (§7.1). |
+| `gh ... --web`: `exec: "xdg-open,…,wslview": executable file not found` | WSL can't open a Windows browser | `gh config set browser "/mnt/c/Windows/explorer.exe"` (§7.2). |
+| `sudo apt install wslu`: `Unable to locate package` | Not packaged for Ubuntu 26.04 | Use the explorer.exe setting above instead. |
+| `git commit`: `Author identity unknown` | No git name/email on this machine | §7.5. |
 
 Nuke-and-rebuild, which fixes most build weirdness:
 
@@ -268,3 +381,8 @@ chess_engine/
 - Build/verify with the terminal commands in §6; never invent new build
   paths. The binary is always `build/chess_engine`.
 - Tooling/config changes (CMake, `.vscode/`, docs) are fine to make when asked.
+- Git/GitHub: follow §7.3 — work on a branch, never commit to `main`, open
+  PRs with `gh pr create`, and end commit messages / PR bodies with any
+  attribution lines your harness requires. Only commit, push, or merge when
+  the owner asks. `gh` is installed and authenticated; if it is missing,
+  don't fall back silently — say so and point to §7.1.
