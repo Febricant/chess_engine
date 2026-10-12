@@ -1,15 +1,8 @@
 #include <iostream>
 #include <cstdint>
 #include <format>
+#include <array>
 #include "encoding.hpp"
-
-
-
-
-
-
-
-
 
 /*
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -26,41 +19,30 @@
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 */
 
-enum class pieces : std::uint8_t {
-        off_board = 0,
-        empty = 1,
-        pawn = 2,
-        king = 3,
-        knight = 4,
-        queen = 5,
-        bishop = 6,
-        rook = 7
-    };
-
-int encoding() {
+std::array<std::uint8_t, 120> position_board() {
     //Position board incidices
-    std::uint8_t board[120] = {};
+    std::array<std::uint8_t, 120> board_120 = {};
     for(std::uint8_t i = 0; i < 120; i++) {
-        board[i] = i;
+        board_120[i] = i;
     }
 
     //position board printing
-    std::cout << "Position Board:\n";
     for(std::uint8_t z = 0; z < 12; z++) {
         for(std::uint8_t i = 0; i < 10; i++) {
-            std::cout << std::format("{:3} ", board[z * 10 + i]) << " ";
+            std::cout << std::format("{:3} ", board_120[z * 10 + i]) << " ";
         }
         std::cout << "\n";
     }
-    std::cout << "\n\n";
+    return board_120;
+}
 
+std::array<std::uint8_t, 120> piece_board_initial() {
     //Piece board encoding vars
-    std::uint8_t piece_board[120] = {};
+    std::array<std::uint8_t, 120> piece_board = {};
     constexpr std::uint8_t black_conversion = 0b0000'1000;
 
     //Piece board encoding indices
-    for(std::uint8_t i = 0; i < 120; i++) {
-        //king
+    //king
         piece_board[25] = static_cast<std::uint8_t>(pieces::king);
         piece_board[95] = (static_cast<std::uint8_t>(pieces::king) | black_conversion);
         
@@ -86,19 +68,19 @@ int encoding() {
         piece_board[91] = (static_cast<std::uint8_t>(pieces::rook) | black_conversion);
         piece_board[98] = (static_cast<std::uint8_t>(pieces::rook) | black_conversion);
 
+    for(std::uint8_t i = 0; i < 120; i++) {
         if(i < 21 || i > 98 || (i % 10 == 0) || (i % 10 == 9)) {
             piece_board[i] = static_cast<std::uint8_t>(pieces::off_board);
         } else if(i >= 31 && i <= 38) {
             piece_board[i] = static_cast<std::uint8_t>(pieces::pawn);
         } else if(i >= 81 && i <= 88) {
             piece_board[i] = (static_cast<std::uint8_t>(pieces::pawn) | black_conversion);
-        } else {
+        } else if(i >= 41 && i <= 78){
             piece_board[i] = static_cast<std::uint8_t>(pieces::empty);
         }
     }
 
     //piece board printing
-    std::cout << "Encoding Board:\n";
     for(std::uint8_t z = 0; z < 12; z++) {
         for(std::uint8_t i = 0; i < 10; i++) {
             std::cout << std::format("{:3} ", piece_board[z * 10 + i]) << " ";
@@ -106,7 +88,24 @@ int encoding() {
         std::cout << "\n";
     }
 
+    return piece_board;
+}
 
-    return 0;
+void square_encoding() {
+    for(char i = 'a'; i < 'i'; i++) {
+        for(std::uint8_t j = 1; j < 9; j++) {
+            std::cout << std::format("{}{}: {}\n", i, j, (j * 10 + (i - 'a' + 1)));
+        }
+    }
+}
 
+void board_120_to_64(std::array<std::uint8_t, 120> board_120) {
+    for(std::uint8_t i = 21; i < 99; i++) {
+        if(i % 10 != 0 && i % 10 != 9) {
+            std::cout << std::format("{:2} ", board_120[i]) << " ";
+            if(i % 10 == 8) {
+                std::cout << "\n";
+            }
+        }
+    }
 }
