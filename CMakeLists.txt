@@ -6,11 +6,12 @@ project(chess_engine
         LANGUAGES CXX)
 
 # --- Language level -------------------------------------------------------
-# STANDARD_REQUIRED means "fail loudly if the compiler can't do C++17"
-# instead of silently falling back. EXTENSIONS OFF asks for -std=c++17
-# rather than -std=gnu++17, so GNU-only extensions won't compile and your
-# code stays portable.
-set(CMAKE_CXX_STANDARD 17)
+# C++20 is needed for std::format (header <format>). STANDARD_REQUIRED
+# means "fail loudly if the compiler can't do C++20" instead of silently
+# falling back. EXTENSIONS OFF asks for -std=c++20 rather than
+# -std=gnu++20, so GNU-only extensions won't compile and your code stays
+# portable.
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

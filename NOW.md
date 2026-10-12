@@ -1,7 +1,7 @@
 # NOW — where to pick up
 
-**Last updated:** 2026-09-17
-**You are here:** Milestone 1 → **Step 1 — Encode pieces and squares**
+**Last updated:** 2026-10-11
+**You are here:** Milestone 1 → **Step 1 — Encode pieces and squares** (in progress)
 **Full map:** [ROADMAP.md](ROADMAP.md)
 
 **Decided in Step 0:** 10x12 mailbox, flat 1D array of 120 elements.
@@ -12,6 +12,16 @@
 
 About 3–5 hours. This is where you stop reading and start writing, and it's your first
 multi-file C++ build.
+
+### Progress as of 2026-10-11
+
+- Multi-file build works, with zero warnings. The project is now on **C++20** for `std::format`.
+- `encoding()` prints a 12×10 grid of square indices 0–119. Use it to find the 64 real squares.
+- **Open issue:** the piece encoding exists twice and the copies disagree. The comment
+  diagram has black = 10–15 (colour in bit 3); the `Pieces` class has black = 8–13 and
+  no empty/off-board value. Pick one and delete the other.
+- The `Pieces` class is a stand-in for an `enum class`, and it carries a movement helper
+  (`move_up`) that belongs to Milestone 2. See "Not yet".
 
 ### The consequence of your Step 0 decision
 
@@ -35,10 +45,12 @@ That distinction is the first thing your piece encoding has to express.
       mailbox idiom. Work out why you'd want *both* directions before you build them —
       each one answers a different question, and FEN parsing in Step 4 needs one of
       them specifically.
-- [ ] **Your first header.** Create a `.hpp` in `include/` and a `.cpp` in `src/`. The
+- [x] **Your first header.** Create a `.hpp` in `include/` and a `.cpp` in `src/`. The
       CMakeLists already globs `src/*.cpp` and puts `include/` on the search path, so
       new files are picked up with **no build-file edit**.
 - [ ] **Delete the scratch `main.cpp`.** It has served its purpose. Write a real one.
+      *(Half done: the input-reading scratch is gone, but `main` still just calls a
+      catch-all `encoding()`.)*
 
 ### C++ concepts this step
 
@@ -50,8 +62,8 @@ what problem it solves · the header/source split: what goes in which file, and 
 
 ## Step 1 is done when
 
-- [ ] `cmake --build build` succeeds with **zero warnings** under `-Wall -Wextra -Wpedantic`
-- [ ] A header in `include/` and a source file in `src/`, both picked up automatically
+- [x] `cmake --build --preset default` succeeds with **zero warnings** under `-Wall -Wextra -Wpedantic`
+- [x] A header in `include/` and a source file in `src/`, both picked up automatically
 - [ ] You can name any square both ways: index ↔ algebraic
 - [ ] The scratch `main.cpp` is gone
 - [ ] You can explain why `enum class` is better here than `#define`

@@ -1,13 +1,11 @@
 #include <iostream>
-#include "encoding.h"
+#include "encoding.hpp"
 
 
 
 int main() {
 
-    std::cout << "Hello World!" << "\n";
-    int dpt = encoding();
-    std::cout << "DPT IS: " << dpt << "\n";
-    return 0;
+    encoding();
+    return 0;   
     
 }

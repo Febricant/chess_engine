@@ -35,7 +35,7 @@ is a numbered command block, and every config file is explained in the
 | Tool | Version known to work | Why |
 |---|---|---|
 | Windows + WSL 2 | Ubuntu 26.04 LTS | Linux environment on Windows. Skip on native Linux. |
-| `g++` | 15.2 | C++ compiler. Project requires **C++17**. |
+| `g++` | 15.2 | C++ compiler. Project requires **C++20** (for `std::format`). |
 | `cmake` | 4.2 (needs **≥ 3.25** for presets v6) | Build system. |
 | `make` | any | CMake generates Makefiles. |
 | `gdb` | any | Debugger used by F5 in VS Code. |
@@ -299,9 +299,9 @@ git config --global user.email "michiob2@gmail.com"
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `fatal error: encoding.h: No such file or directory` when clicking ▶ | ▶ button bypasses CMake | Use Ctrl+Shift+B / F5 / terminal instead (see §6). |
+| `fatal error: encoding.hpp: No such file or directory` when clicking ▶ | ▶ button bypasses CMake | Use Ctrl+Shift+B / F5 / terminal instead (see §6). |
 | Red squiggle on `#include "something.h"` but terminal build works | IntelliSense hasn't read `build/compile_commands.json` | Run `cmake --preset default`, then Reload Window. |
-| `undefined reference to 'foo(int)'` at link time | Declaration in the `.h` and definition in the `.cpp` have different signatures (C++ treats them as two overloads) | Make the parameter/return types match exactly. |
+| `undefined reference to 'foo(int)'` at link time | Declaration in the `.hpp` and definition in the `.cpp` have different signatures (C++ treats them as two overloads) | Make the parameter/return types match exactly. |
 | `cmake --build` says `could not load cache` / compiler errors mentioning `.exe` | Stale or Windows-made `build/` | `rm -rf build && cmake --preset default` |
 | `CMake Error: ... preset version 6 ... not supported` | CMake older than 3.25 | Upgrade CMake (§3). |
 | Program waits and prints nothing | It's waiting for `std::cin` input | Type input in the terminal (F5: the debug terminal). |
@@ -326,9 +326,9 @@ cmake --build --preset default
 
 ```
 chess_engine/
-├── CMakeLists.txt         # what to build: all src/*.cpp → chess_engine, C++17, warnings on
+├── CMakeLists.txt         # what to build: all src/*.cpp → chess_engine, C++20, warnings on
 ├── CMakePresets.json      # how to configure: g++, Debug, Makefiles, export compile_commands
-├── include/               # headers (.h) — on the include path, so #include "x.h" works
+├── include/               # headers (.hpp) — on the include path, so #include "x.hpp" works
 ├── src/                   # sources (.cpp) — globbed automatically
 ├── build/                 # generated, git-ignored; binary is build/chess_engine
 ├── .vscode/
@@ -344,7 +344,8 @@ chess_engine/
 ### Config files explained
 
 **`CMakeLists.txt`**
-- `CMAKE_CXX_STANDARD 17`, required, no GNU extensions (`-std=c++17`).
+- `CMAKE_CXX_STANDARD 20`, required, no GNU extensions (`-std=c++20`).
+  Raised from 17 on 2026-10-11 so `<format>` / `std::format` is available.
 - Defaults to `Debug` if no build type is given.
 - `file(GLOB_RECURSE ... CONFIGURE_DEPENDS src/*.cpp)` — every `.cpp` in
   `src/` is compiled; new files need no CMake edit.
