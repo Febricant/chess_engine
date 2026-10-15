@@ -86,6 +86,13 @@ std::array<std::uint8_t, 120> piece_board_initial() {
     }
     return piece_board;
 }
+int is_black(const std::array<std::uint8_t, 120> array, int index) {
+    if(0b0000'1000 & array[index]) {
+        return 1;
+    }
+    return 0;
+}
+
 
 //initializes the square encoding board a1-h8
 std::array<std::string, 64> square_encoding() {
@@ -99,7 +106,7 @@ std::array<std::string, 64> square_encoding() {
 }
 
 //gives square encoding of certain index
-std::string square_encoding_index(const std::array<std::string, 64> &squares, std::uint8_t index) {
+std::string square_index_encoding(const std::array<std::string, 64> &squares, std::uint8_t index) {
     if(index < 21 || index > 98 || index % 10 == 0 || index % 10 == 9) {
         return "-";
     }
@@ -109,6 +116,18 @@ std::string square_encoding_index(const std::array<std::string, 64> &squares, st
     column_equalize = (column_equalize - 2) * 2;
 
     return squares[index - (column_equalize + subtract_factor)];
+}
+
+int square_encoding_index(const std::string &coord) {
+    //if not valid format return -1
+    if((coord.length() != 2) || (coord[0] - 'a') < 0 || (coord[0] - 'a') >= 8 || (coord[1] - '1') < 0 || (coord[1] - '1') >= 8) {
+        return -1;
+    }
+    int file = coord[0] - 'a';
+    int rank = coord[1] - '1';
+    int index_64 = file + (rank * 8);
+
+    return index_64 + (21 + (rank * 2));
 }
 
 //prints a 120 board to its 64 counter part
