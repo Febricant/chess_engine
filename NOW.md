@@ -1,87 +1,129 @@
 # NOW — where to pick up
 
-**Last updated:** 2026-10-11
-**You are here:** Milestone 1 → **Step 1 — Encode pieces and squares** (in progress)
+**Last updated:** 2026-10-15
+**You are here:** Milestone 1 → **Step 2 — The position structure**
 **Full map:** [ROADMAP.md](ROADMAP.md)
 
-**Decided in Step 0:** 10x12 mailbox, flat 1D array of 120 elements.
+**Decided so far:** 10x12 mailbox, flat 1D array of 120 (Step 0). Pieces as one byte:
+0 off-board, 1 empty, 2–7 white, black = white + 8, so bit 3 is the colour (Step 1).
 
 ---
 
-## This session — first code of the project
+## Step 1 — done (2026-10-15)
 
-About 3–5 hours. This is where you stop reading and start writing, and it's your first
-multi-file C++ build.
+Took **10+ hours** against a 3–5 hour plan. Most of the extra went into reworking code
+that already worked; see "Lessons" below.
 
-### Progress as of 2026-10-11
+- `pieces` is an `enum class` with a `std::uint8_t` underlying type; `black_conversion`
+  is the named bit-3 constant
+- Helpers `is_piece` / `is_white` / `is_black` / `piece_type`, verified on every value
+- Square names both ways: index → name and name → index, with input validation
+  (returns −1 for bad text). Round trip verified on all 64 squares
+- 12×10 debug printer and 8×8 printer (rank 8 on top), both taking the board by `const &`
+- Build is clean under `-Wall -Wextra -Wpedantic`; merged in PRs #3–#5
+- **Pending:** the `enum class` quiz (explain why it beats `#define`)
 
-- Multi-file build works, with zero warnings. The project is now on **C++20** for `std::format`.
-- `encoding()` prints a 12×10 grid of square indices 0–119. Use it to find the 64 real squares.
-- **Open issue:** the piece encoding exists twice and the copies disagree. The comment
-  diagram has black = 10–15 (colour in bit 3); the `Pieces` class has black = 8–13 and
-  no empty/off-board value. Pick one and delete the other.
-- The `Pieces` class is a stand-in for an `enum class`, and it carries a movement helper
-  (`move_up`) that belongs to Milestone 2. See "Not yet".
+### Carried over (small, fix when convenient)
 
-### The consequence of your Step 0 decision
+- `helper.hpp` and `encoding.hpp` include each other. Move the `pieces` enum into
+  `helper.hpp` so includes run one way only — Step 2 adds headers, so do it then.
+- The yes/no helpers return `int`; `bool` says what they mean. `piece_type` could return
+  `pieces`.
+- The two square-name functions still use the 64-entry name table plus border math. It
+  works; leave it unless Step 4 (FEN) makes it awkward.
 
-You picked 10x12, so **"empty" and "off-board" are two different things** and both need
-a value. An 8x8 board would have needed only "empty"; the border cells in your array are
-squares that exist in memory but not in chess, and code that confuses the two will walk
-a rook straight off the edge of the world.
+### Lessons from Step 1
 
-That distinction is the first thing your piece encoding has to express.
+- **`int` for arithmetic and loop counters; `std::uint8_t` only for storage.** Three bugs
+  came from `std::uint8_t`: a countdown loop wrapping 0 → 255, rank-1 math going below
+  zero, and a number printing as the letter `D` (`std::uint8_t` *is* `unsigned char`).
+- **Header and `.cpp` signatures must match exactly** — a mismatch makes two different
+  functions (overloads), not one.
+- **Read the first error, then rebuild.** The rest are usually fallout.
+- **Warnings are bugs reported early.** `-Waddress` found a function named but not
+  called. Use `cmake --build --preset default --clean-first` to see every warning.
+- **Test every value, not one example.** A full table caught `is_piece` missing knights
+  and queens.
+- **Once it works and passes its test, move on.** Note improvements; don't redesign.
+
+---
+
+## This step — the position structure
+
+Estimate at your actual pace: **5–8 hours.**
+
+A chess position is more than where the pieces stand. Two positions with identical
+pieces can be different positions, because of whose turn it is, who may still castle,
+and whether en passant is possible. Step 2 puts all of it in **one thing** you can pass
+around.
+
+### The six components
+
+1. **Piece placement** — your 120 board
+2. **Side to move** — white or black
+3. **Castling rights** — four of them: white king-side, white queen-side, black
+   king-side, black queen-side
+4. **En passant target square** — a square index, or "none"
+5. **Halfmove clock** — moves since the last capture or pawn move (the 50-move rule)
+6. **Fullmove number** — starts at 1, goes up after black moves
 
 ### What to work out
 
-- [ ] **Piece encoding.** You need: empty, off-board, and six piece types in two
-      colours. Decide whether colour and type are one value or two. Both designs are
-      defensible; think about which one makes "is this piece mine?" cheap, because
-      you'll ask that question millions of times per second in Milestone 2.
-- [ ] **Square encoding.** Your squares are indices 0–119, but only 64 of them are real.
-      Work out which. You will want to convert between a square index and a
-      file/rank pair, and between a square index and algebraic notation like `e4`.
-- [ ] **The two mapping tables.** A 64→120 table and a 120→64 table is the standard
-      mailbox idiom. Work out why you'd want *both* directions before you build them —
-      each one answers a different question, and FEN parsing in Step 4 needs one of
-      them specifically.
-- [x] **Your first header.** Create a `.hpp` in `include/` and a `.cpp` in `src/`. The
-      CMakeLists already globs `src/*.cpp` and puts `include/` on the search path, so
-      new files are picked up with **no build-file edit**.
-- [ ] **Delete the scratch `main.cpp`.** It has served its purpose. Write a real one.
-      *(Half done: the input-reading scratch is gone, but `main` still just calls a
-      catch-all `encoding()`.)*
+- [ ] **`struct` or `class`?** In C++ they differ in exactly one way. Find out what it is,
+      then decide which one says what you mean. The question underneath: should other
+      code be allowed to change the fields directly, or only through functions you
+      provide?
+- [ ] **A type for each field.** Side to move has exactly two values — what does that
+      suggest, given what you learned about `enum class`? Castling: four `bool`s, or four
+      bits in one byte (the same trick as your colour bit)? Both work; pick the one you
+      can explain. En passant needs a value meaning "no square" that can never be a real
+      index — you already chose one for name → index.
+- [ ] **What "empty" means.** When a position is created, what should every field hold?
+      Look up default member initializers; a position that starts half-filled with
+      garbage is a Step 4 bug waiting to happen.
+- [ ] **Where the functions go.** Your printers and helpers take the board as a
+      parameter today. Once the board lives inside a position, decide whether they take
+      a position, or become member functions. Look up `const` member functions and what
+      the `const` after the parameter list promises.
+- [ ] **The starting position.** Until FEN exists, something has to fill a position with
+      the opening setup. Reuse `piece_board_initial` for the pieces; the other five
+      fields have known starting values — find them.
+- [ ] **Fix the circular include** (carried over) while you're adding the new header.
 
 ### C++ concepts this step
 
-`enum class` — and specifically why it's better here than `#define` or a bare C enum ·
-`constexpr` for compile-time constants · `std::array` vs a C array · `#pragma once` and
-what problem it solves · the header/source split: what goes in which file, and why.
+`struct` vs `class` and the one real difference · access specifiers (`public` /
+`private`) · member functions and `const` member functions · default member initializers
+· a second `enum class` (for colour) · passing the whole position by `const &`.
+Reference: *A Tour of C++*, chapter *Classes*; cppreference *Classes* and *Default
+member initializer*.
 
 ---
 
-## Step 1 is done when
+## Step 2 is done when
 
-- [x] `cmake --build --preset default` succeeds with **zero warnings** under `-Wall -Wextra -Wpedantic`
-- [x] A header in `include/` and a source file in `src/`, both picked up automatically
-- [ ] You can name any square both ways: index ↔ algebraic
-- [ ] The scratch `main.cpp` is gone
-- [ ] You can explain why `enum class` is better here than `#define`
+- [ ] One type holds **all six** components — not just the pieces
+- [ ] A freshly created position has a defined value in every field
+- [ ] You can set up the starting position and print it
+- [ ] Clean build under `-Wall -Wextra -Wpedantic` with **zero warnings** (`--clean-first`)
+- [ ] You can stop in gdb, expand the position, and say what every field means
+- [ ] You can explain why you chose `struct` or `class`
 
 ---
 
-## Then: Step 2 — the position structure
+## Then: Step 3 — print it properly
 
-All six components: piece placement, side to move, four castling-rights flags, en
-passant target square, halfmove clock, fullmove number. Not just the pieces.
+Your 8×8 printer already gets the board right. Step 3 adds the invisible state under it:
+side to move, castling rights, en passant square. Those are the fields that cause bugs
+precisely because you can't see them.
 
 ---
 
 ## Not yet
 
-- Move generation, direction offsets, attack detection — Milestone 2. The 10x12 payoff
-  arrives there; don't spend it early.
-- FEN parsing — Step 4, after the position structure exists
+- Move generation, direction offsets, attack detection — Milestone 2. An empty
+  `move_validity.cpp` came and went; leave it until Milestone 2.
+- FEN parsing — Step 4, after the position struct exists
 - Anything neural — Milestone 8, with a PyTorch warm-up first
 - Hardware parts — Milestone 10, gated on UCI
 - Templates, smart pointers, inheritance, operator overloading — not needed
@@ -93,10 +135,12 @@ passant target square, halfmove clock, fullmove number. Not just the pieces.
 - **UCI moves to Milestone 5**, ahead of the bitboard rewrite. `CLAUDE.md` updated.
 - **The no-code rule covers every language** — C++, Python, firmware. No boilerplate
   exemption. `CLAUDE.md` rule 1 updated.
+- **C++20**, for `std::format` (2026-10-11).
+- **Headers are `.hpp`**; small hot helpers may live in headers as `constexpr`/`inline`.
 
 ---
 
 ## How this file works
 
-This is the "you are here" pin. Say *"update NOW.md, I finished step 1"* and it'll be
+This is the "you are here" pin. Say *"update NOW.md, I finished step 2"* and it'll be
 re-pointed. `ROADMAP.md` is the stable full map and changes rarely.

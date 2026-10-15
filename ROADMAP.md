@@ -32,19 +32,21 @@ The project has three tracks:
 WSL extension (details in `SETUP.md`). Git work goes branch → PR → merge via `gh`; PRs
 #1 (build tooling + `SETUP.md`) and #2 (`gh` workflow docs) are merged.
 
-*Updated 2026-10-11.* Milestone 1, Step 0 is done (10x12 mailbox, flat 1D array).
-Step 1 is in progress. `include/encoding.hpp` and `src/encoding.cpp` are picked up by the
-build, and **the build is now clean: zero warnings**. The project moved from C++17 to
-**C++20** so `std::format` can be used for aligned printing. `encoding()` fills a
-120-element board with its own indices and prints it as a 12×10 grid. That's a
-square-index map, and it's a useful reference for working out the 64 real squares.
+*Updated 2026-10-15.* Milestone 1, Steps 0 and 1 are done; **Step 2 (position struct)
+is next**. The project is on **C++20** (for `std::format`). Pieces are an `enum class`
+over `std::uint8_t`: 0 off-board, 1 empty, 2–7 white, black = white + 8 (bit 3 is
+colour), with `is_piece` / `is_white` / `is_black` / `piece_type` helpers verified on
+every value. Square index ↔ algebraic name works both ways with input validation,
+round-trip verified on all 64 squares. Boards are `std::array<std::uint8_t, 120>` passed
+by `const &`; there is a 12×10 debug printer and an 8×8 printer with rank 8 on top.
+Clean build, zero warnings. Merged via PRs #3–#5. The `enum class` checkpoint quiz is
+pending. Known small debt: `helper.hpp` and `encoding.hpp` include each other.
 
-The piece encoding exists twice, and the two copies disagree. The comment diagram uses
-0 off-board, 1 empty, 2–7 white, 10–15 black (colour in bit 3). A new `Pieces` class
-uses 2–7 white and 8–13 black, with no empty or off-board value. The values are still
-plain `int` members rather than an `enum class`. There are no square mapping tables yet.
-`main.cpp` is no longer the input-reading scratch file, but it only calls
-`encoding()`.
+**Actual pace vs plan.** Step 1 took 10+ hours against a 3–5 hour plan — about 2–3×,
+inside the 3× variance this document warns about. Re-estimated at that pace, the rest of
+Milestone 1 is **~21–35 hours**, finishing roughly **mid-November to late December
+2026**. If the multiplier holds, the full project is closer to 3–5 years than 1.5–3.
+Expect it to shrink as the first-contact C++ learning stops repeating.
 
 ---
 
