@@ -1,5 +1,6 @@
 #include <iostream>
 #include "encoding.hpp"
+#include "helper.hpp"
 
 
 int main() {
@@ -21,8 +22,8 @@ int main() {
     std::cout << "\n";
 
     std::array<std::string, 64> square_board = square_encoding();
-    std::cout << square_index_encoding(square_board, 68) << "\n";
-    std::cout << square_encoding_index("h5") << "\n";
+    std::cout << square_indextoname(square_board, 68) << "\n";
+    std::cout << square_nametoindex("h5") << "\n";
 
     std::cout << is_black(piece_board, 35);
 
