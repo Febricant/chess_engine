@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <format>
 #include <array>
+#include <string>
 #include "encoding.hpp"
 
 /*
@@ -19,22 +20,24 @@
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 */
 
-std::array<std::uint8_t, 120> position_board() {
+std::array<std::uint8_t, 120> position_board_() {
     //Position board incidices
     std::array<std::uint8_t, 120> board_120 = {};
     for(std::uint8_t i = 0; i < 120; i++) {
         board_120[i] = i;
     }
+    return board_120;
+}
 
-    //position board printing
-    for(std::uint8_t z = 0; z < 12; z++) {
+void board_print_120(const std::array<std::uint8_t, 120> &board_120) {
+    for(std::uint8_t z = 12; z > 0; z--) {
         for(std::uint8_t i = 0; i < 10; i++) {
-            std::cout << std::format("{:3} ", board_120[z * 10 + i]) << " ";
+            std::cout << std::format("{:3} ", board_120[(z-1) * 10 + i]) << " ";
         }
         std::cout << "\n";
     }
-    return board_120;
 }
+
 
 std::array<std::uint8_t, 120> piece_board_initial() {
     //Piece board encoding vars
@@ -79,33 +82,35 @@ std::array<std::uint8_t, 120> piece_board_initial() {
             piece_board[i] = static_cast<std::uint8_t>(pieces::empty);
         }
     }
-
-    //piece board printing
-    for(std::uint8_t z = 0; z < 12; z++) {
-        for(std::uint8_t i = 0; i < 10; i++) {
-            std::cout << std::format("{:3} ", piece_board[z * 10 + i]) << " ";
-        }
-        std::cout << "\n";
-    }
-
     return piece_board;
 }
 
-void square_encoding() {
-    for(char i = 'a'; i < 'i'; i++) {
-        for(std::uint8_t j = 1; j < 9; j++) {
-            std::cout << std::format("{}{}: {}\n", i, j, (j * 10 + (i - 'a' + 1)));
+std::string square_encoding(std::uint8_t index) {
+    std::array<std::string, 64> squares = {};
+    if(index < 21 || index > 98 || index % 10 == 0 || index % 10 == 9) {
+        return "-";
+    }
+    for(std::uint8_t j = 1; j < 9; j++) {
+        for(char k = 'a'; k <= 'h'; k++) {
+            squares[(static_cast<std::uint8_t >(j) * 8) - static_cast<std::uint8_t >(('h'- k) + 1)] = std::format("{}{}", k, j);
         }
     }
+
+    std::uint8_t subtract_factor = 21;
+    std::uint8_t column_equalize = 0;
+    if(index > 28) {
+        column_equalize = index / 10;
+        column_equalize -= 2;
+        column_equalize *= 2;
+    }
+    return squares[index - (column_equalize + subtract_factor)];
 }
 
-void board_120_to_64(std::array<std::uint8_t, 120> board_120) {
-    for(std::uint8_t i = 21; i < 99; i++) {
-        if(i % 10 != 0 && i % 10 != 9) {
-            std::cout << std::format("{:2} ", board_120[i]) << " ";
-            if(i % 10 == 8) {
-                std::cout << "\n";
-            }
+void print_board_120_to_64(const std::array<std::uint8_t, 120> &board_120) {
+    for(std::uint8_t j = 8; j > 0; j--) {
+        for(std::uint8_t k = 0; k < 8; k++) {
+            std::cout << std::format("{:2} ", board_120[j * 10 + k + 11]) << " ";
         }
+        std::cout << "\n";
     }
 }
