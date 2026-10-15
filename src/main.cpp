@@ -20,7 +20,8 @@ int main() {
     print_board_120_to_64(piece_board);
     std::cout << "\n";
 
-    std::cout << square_encoding(71);
+    std::array<std::string, 64> square_board = square_encoding();
+    std::cout << square_encoding_index(square_board, 68);
 
 
     return 0;   

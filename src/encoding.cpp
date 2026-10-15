@@ -20,6 +20,7 @@
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 */
 
+//initializes the positon board 0-119
 std::array<std::uint8_t, 120> position_board_() {
     //Position board incidices
     std::array<std::uint8_t, 120> board_120 = {};
@@ -29,6 +30,7 @@ std::array<std::uint8_t, 120> position_board_() {
     return board_120;
 }
 
+//prints boards that are 120 array indicies
 void board_print_120(const std::array<std::uint8_t, 120> &board_120) {
     for(std::uint8_t z = 12; z > 0; z--) {
         for(std::uint8_t i = 0; i < 10; i++) {
@@ -38,14 +40,14 @@ void board_print_120(const std::array<std::uint8_t, 120> &board_120) {
     }
 }
 
-
+//initializes the piece board on indicies 0-119
 std::array<std::uint8_t, 120> piece_board_initial() {
     //Piece board encoding vars
     std::array<std::uint8_t, 120> piece_board = {};
     constexpr std::uint8_t black_conversion = 0b0000'1000;
 
     //Piece board encoding indices
-    //king
+        //king
         piece_board[25] = static_cast<std::uint8_t>(pieces::king);
         piece_board[95] = (static_cast<std::uint8_t>(pieces::king) | black_conversion);
         
@@ -85,27 +87,31 @@ std::array<std::uint8_t, 120> piece_board_initial() {
     return piece_board;
 }
 
-std::string square_encoding(std::uint8_t index) {
+//initializes the square encoding board a1-h8
+std::array<std::string, 64> square_encoding() {
     std::array<std::string, 64> squares = {};
-    if(index < 21 || index > 98 || index % 10 == 0 || index % 10 == 9) {
-        return "-";
-    }
     for(std::uint8_t j = 1; j < 9; j++) {
         for(char k = 'a'; k <= 'h'; k++) {
             squares[(static_cast<std::uint8_t >(j) * 8) - static_cast<std::uint8_t >(('h'- k) + 1)] = std::format("{}{}", k, j);
         }
     }
+    return squares;
+}
+
+//gives square encoding of certain index
+std::string square_encoding_index(const std::array<std::string, 64> &squares, std::uint8_t index) {
+    if(index < 21 || index > 98 || index % 10 == 0 || index % 10 == 9) {
+        return "-";
+    }
 
     std::uint8_t subtract_factor = 21;
-    std::uint8_t column_equalize = 0;
-    if(index > 28) {
-        column_equalize = index / 10;
-        column_equalize -= 2;
-        column_equalize *= 2;
-    }
+    std::uint8_t column_equalize = index / 10;
+    column_equalize = (column_equalize - 2) * 2;
+
     return squares[index - (column_equalize + subtract_factor)];
 }
 
+//prints a 120 board to its 64 counter part
 void print_board_120_to_64(const std::array<std::uint8_t, 120> &board_120) {
     for(std::uint8_t j = 8; j > 0; j--) {
         for(std::uint8_t k = 0; k < 8; k++) {
