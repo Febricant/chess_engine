@@ -54,7 +54,9 @@ firmware too. I'm comfortable in Python; ML is new.
   logged in as `Febricant`; it opens links via
   `/mnt/c/Windows/explorer.exe` because `wslu` isn't packaged for Ubuntu
   26.04 and `/etc/wsl.conf` has `appendWindowsPath = false`. Repo-local git
-  identity is `Michio <michiob2@gmail.com>`.
+  identity is `Michio <97841412+Febricant@users.noreply.github.com>` — GitHub's
+  no-reply address, so no real email is published in this public repo's history.
+  Never commit with a personal email address.
 - Dev setup: native Linux g++ (`/usr/bin/g++`) in WSL (Ubuntu), VS Code
   connected via the WSL extension. Build with `cmake --preset default` +
   `cmake --build --preset default`; binary lands at `build/chess_engine`.

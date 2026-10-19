@@ -286,12 +286,21 @@ git checkout main && git pull  # make sure local main has the merge
 ### 7.5 First-time git identity
 
 Commits fail with `Author identity unknown` until git knows who you are
-(once per machine):
+(once per clone). The repo is **public**, so use GitHub's **no-reply**
+address, never a personal email: every commit's author email is visible
+to anyone.
 
 ```bash
-git config --global user.name  "Michio"
-git config --global user.email "michiob2@gmail.com"
+git config user.name  "Michio"
+git config user.email "97841412+Febricant@users.noreply.github.com"
 ```
+
+Without `--global` this applies to this repo only. Find your own no-reply
+address at GitHub → Settings → Emails (it looks like
+`<id>+<username>@users.noreply.github.com`). On that page, also turn on
+**Keep my email addresses private** and **Block command line pushes that
+expose my email**, so a push with a personal email is rejected instead of
+published.
 
 ---
 
