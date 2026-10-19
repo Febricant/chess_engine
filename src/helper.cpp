@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cstdint>
 #include <array>
 #include <string>
@@ -31,4 +32,7 @@ int piece_type(const std::array<std::uint8_t, 120> &array, int index) {
 
 }
 
+void new_line() {
+    std::cout << "\n";
+}
 
